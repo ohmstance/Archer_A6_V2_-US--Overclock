@@ -16,7 +16,7 @@ PKG_REV:=08bf9b8f378409e56df11a4dd796b2d309121ee5
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=git://github.com/haibbo/improxy.git
+PKG_SOURCE_URL:=https://github.com/haibbo/improxy.git
 PKG_BRANCH:=OpenWRT/uClibc
 PKG_SOURCE_VERSION:=$(PKG_REV)
 
