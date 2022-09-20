@@ -13,7 +13,7 @@ PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://oss.metaparadigm.com/json-c/
-PKG_MD5SUM:=3a13d264528dcbaf3931b0cede24abae
+PKG_MD5SUM:=aa02367d2f7a830bf1e3376f77881e98
 
 PKG_FIXUP:=libtool
 PKG_INSTALL:=1
