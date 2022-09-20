@@ -4,7 +4,7 @@
 
 BUILD_DIR:=.
 SDK_DIR:=../openwrt
-SUBMAKE:=$(MAKE) $(FLAGS)
+SUBMAKE:=+$(MAKE) $(FLAGS)
 
 all: bootstrap build
 
