@@ -303,10 +303,18 @@
                             "mem=128M"
 #endif
 #elif defined(CONFIG_PRODUCT_A6V2)
+#if defined(CFG_DOUBLE_BOOT_FACTORY) || defined (CFG_DOUBLE_BOOT_SECOND)
+#define CONFIG_SECOND_BOOTLOADER_SIZE 0x20000
+#define CONFIG_BOOTARGS		"console=ttyS0,115200 board=AP152 " \
+							"rootfstype=squashfs " \
+							"init=/etc/preinit " \
+							"spi0.0:192k(factory-uboot),128k(u-boot),1152k(uImage),14784k(rootfs),64k@0xff0000(ART) "
+#else
 #define CONFIG_BOOTARGS     "console=ttyS0,115200 board=AP152 " \
 								"rootfstype=squashfs " \
 								"init=/etc/preinit " \
 								"mtdparts=spi0.0:192k(u-boot),1152k(uImage),14912k(rootfs),64k@0xff0000(ART) "                            
+#endif
 #elif defined(CONFIG_PRODUCT_WR1043NV5)
 #if defined(CFG_DOUBLE_BOOT_FACTORY) || defined (CFG_DOUBLE_BOOT_SECOND)
 #define CONFIG_SECOND_BOOTLOADER_SIZE 0x20000
@@ -357,7 +365,11 @@
 #elif defined(CONFIG_PRODUCT_C7V5)
 	#define CONFIG_BOOTCOMMAND	"bootm 0x9f0c0000"
 #elif defined(CONFIG_PRODUCT_A6V2)
-	#define CONFIG_BOOTCOMMAND	"bootm 0x9f030000"
+	#if defined(CFG_DOUBLE_BOOT_FACTORY) || defined (CFG_DOUBLE_BOOT_SECOND)
+		#define CONFIG_BOOTCOMMAND	"bootm 0x9f050000"
+	#else
+		#define CONFIG_BOOTCOMMAND	"bootm 0x9f030000"
+	#endif
 #else
 	#define CONFIG_BOOTCOMMAND	"bootm 0x9f0b0000"
 #endif
