@@ -1,0 +1,22 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2008-2010 OpenWrt.org
+
+START=47
+
+boot() {
+    # when iptv is enabled, qca-hnat will starting in iptv init script.
+    [ "$(uci get iptv.iptv.enable)" == "on" ] || qca-hnat start;
+}
+
+start() {
+    qca-hnat start
+}
+
+stop() {
+    qca-hnat stop
+}
+
+restart() {
+   qca-hnat stop
+   qca-hnat start
+}
