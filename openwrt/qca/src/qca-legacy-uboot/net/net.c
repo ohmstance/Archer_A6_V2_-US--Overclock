@@ -567,8 +567,9 @@ skip_netloop:
 			/* 
 			 * 10s would pass in firmware recovery when fail happen
 			 * reson may be no tftpserver at the beginning
+			 * EDIT: 20s
 			 */
-			if ((get_timer(0) - fwrecovTftpStart) > 10*CFG_HZ && rx_cnt < 4096)
+			if ((get_timer(0) - fwrecovTftpStart) > 20*CFG_HZ && rx_cnt < 4096)
 			{
 				puts("Tftp server tranfer fail!\n");
 				return (-1);

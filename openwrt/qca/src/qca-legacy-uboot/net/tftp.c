@@ -63,10 +63,23 @@ static char *tftp_filename;
 extern flash_info_t flash_info[];
 #endif
 
+// ---- 1.3.0 tftp.c start ----
+/* 512 is poor choice for ethernet, MTU is typically 1500.
+ * Minus eth.hdrs thats 1468.  Can get 2x better throughput with
+ * almost-MTU block sizes.  At least try... fall back to 512 if need be.
+ */
+#define TFTP_MTU_BLOCKSIZE 1468
+static unsigned short TftpBlkSize=TFTP_BLOCK_SIZE;
+static unsigned short TftpBlkSizeOption=TFTP_MTU_BLOCKSIZE;
+// ---- 1.3.0 tftp.c stops ----
+
 static __inline__ void
 store_block (unsigned block, uchar * src, unsigned len)
 {
-	ulong offset = block * TFTP_BLOCK_SIZE + TftpBlockWrapOffset;
+	// ---- 1.3.0 tftp.c edit ----
+	ulong offset = block * TftpBlkSize + TftpBlockWrapOffset;
+	// ulong offset = block * TFTP_BLOCK_SIZE + TftpBlockWrapOffset;
+	
 	ulong newsize = offset + len;
 	bd_t *bd = gd->bd;
 #ifdef CFG_DIRECT_FLASH_TFTP
@@ -165,6 +178,13 @@ TftpSend (void)
 		printf("send option \"timeout %s\"\n", (char *)pkt);
 #endif
 		pkt += strlen((char *)pkt) + 1;
+		
+		// ---- 1.3.0 tftp.c start ----
+		/* try for more effic. blk size */
+		pkt += sprintf((char *)pkt,"blksize%c%d%c",
+				0,TftpBlkSizeOption,0);
+		// ---- 1.3.0 tftp.c stops ----
+		
 		len = pkt - xp;
 		break;
 
@@ -210,6 +230,10 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 {
 	ushort proto;
 	ushort *s;
+	
+	// ---- 1.3.0 tftp.c start ----
+	int i;
+	// ---- 1.3.0 tftp.c stops ----
 
 	if (dest != TftpOurPort) {
 		return;
@@ -241,6 +265,26 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 #endif
 		TftpState = STATE_OACK;
 		TftpServerPort = src;
+		
+		// ---- 1.3.0 tftp.c start ----
+		/*
+		 * Check for 'blksize' option.
+		 * Careful: "i" is signed, "len" is unsigned, thus
+		 * something like "len-8" may give a *huge* number
+		 */
+		for (i=0; i+8<len; i++) {
+			if (strcmp ((char*)pkt+i,"blksize") == 0) {
+				TftpBlkSize = (unsigned short)
+					simple_strtoul((char*)pkt+i+8,NULL,10);
+#ifdef ET_DEBUG
+				printf ("Blocksize ack: %s, %d\n",
+					(char*)pkt+i+8,TftpBlkSize);
+#endif
+				break;
+			}
+		}
+		// ---- 1.3.0 tftp.c stop ----
+		
 		TftpSend (); /* Send ACK */
 		break;
 	case TFTP_DATA:
@@ -257,8 +301,12 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 		 */
 		if (TftpBlock == 0) {
 			TftpBlockWrap++;
-			TftpBlockWrapOffset += TFTP_BLOCK_SIZE * TFTP_SEQUENCE_SIZE;
-			printf ("\n\t %lu MB reveived\n\t ", TftpBlockWrapOffset>>20);
+			
+			// ---- 1.3.0 tftp.c edit ----
+			TftpBlockWrapOffset += TftpBlkSize * TFTP_SEQUENCE_SIZE;
+			// TftpBlockWrapOffset += TFTP_BLOCK_SIZE * TFTP_SEQUENCE_SIZE;
+			
+			printf ("\n\t %lu MB reveived\n\t ", TftpBlockWrapOffset>>20);		
 		} else {
 			if (((TftpBlock - 1) % 10) == 0) {
 				putc ('#');
@@ -308,8 +356,11 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 		 *	the server for the next one.
 		 */
 		TftpSend ();
-
-		if (len < TFTP_BLOCK_SIZE) {
+		
+		// ---- 1.3.0 tftp.c edit ----
+		if (len < TftpBlkSize) {
+		// if (len < TFTP_BLOCK_SIZE) {
+		
 			/*
 			 *	We received the whole thing.  Try to
 			 *	run it.
@@ -415,6 +466,11 @@ TftpStart (void)
 
 	/* zero out server ether in case the server ip has changed */
 	memset(NetServerEther, 0, 6);
+	
+	// ---- 1.3.0 tftp.c start ----
+	/* Revert TftpBlkSize to dflt */
+	TftpBlkSize = TFTP_BLOCK_SIZE;
+	// ---- 1.3.0 tftp.c stop ----
 
 	TftpSend ();
 }
