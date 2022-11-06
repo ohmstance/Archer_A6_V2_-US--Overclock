@@ -39,3 +39,5 @@ Using ath10k-ct, with stock clocks, I've plateaud at around 220 Mb/s on iperf3 (
 
 ## Addendum
 I couldn't test WiFi performance on stock firmware as I bricked my device due to me erasing the factory-uboot partition. As I was making sure about my final commit regarding TFTP recovery timeout, I found myself unable to write my newly built u-boot to the factory-uboot partition due to it being write protected. Although the second u-boot does not allow writes to write-protected area of the flash, it allowed *erasing* them.
+
+I've recovered my router using a flash programmer.
